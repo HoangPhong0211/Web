@@ -101,21 +101,21 @@ $featuredProjects = [
             </p>
             <div class="grid gap-4 text-sm">
                 <a href="{{ route('certificates') }}#xy1" class="block rounded-2xl border border-white/15 p-4 transition hover:border-white/40 hover:bg-white/5">
-                    <p class="font-semibold">Máy khoan XY-1</p>
-                    <p class="text-white/70 mt-1">Phục vụ khoan khảo sát địa chất, lấy mẫu và mô tả địa tầng.</p>
+                    <p class="font-semibold">Máy thử độ bền nén TYE-2000</p>
+                    <p class="text-white/70 mt-1">Thực hiện thí nghiệm xác định cường độ chịu nén của các mẫu vật liệu xây dựng với độ chính xác cao.</p>
                 </a>
-                <a href="{{ route('certificates') }}#cpt" class="block rounded-2xl border border-white/15 p-4 transition hover:border-white/40 hover:bg-white/5">
-                    <p class="font-semibold">Thiết bị CPT</p>
-                    <p class="text-white/70 mt-1">Đánh giá sức kháng đất tại hiện trường nhanh và chính xác.</p>
+                <a href="{{ route('certificates') }}#maycatdat" class="block rounded-2xl border border-white/15 p-4 transition hover:border-white/40 hover:bg-white/5">
+                    <p class="font-semibold">Máy cắt đất ZJ</p>
+                    <p class="text-white/70 mt-1">Thiết bị chuyên dụng để xác định nhanh chóng và tin cậy các đặc trưng sức chống cắt của nền đất.</p>
                 </a>
             </div>
         </div>
         <div class="rounded-[32px] bg-white/5 p-8 grid gap-5">
-            <div class="rounded-3xl bg-white/10 p-6">
+            <a href="{{ route('certificates') }}" class="block rounded-3xl bg-white/10 p-6 transition hover:bg-white/15">
                 <p class="text-xs uppercase tracking-[0.3em] text-white/60">Chứng chỉ</p>
                 <p class="mt-2 font-display text-2xl">ISO & LAS-XD 1109</p>
                 <p class="mt-2 text-white/70 text-sm">Hệ thống quản lý và năng lực phòng thí nghiệm theo phạm vi được cấp phép.</p>
-            </div>
+            </a>
             <div class="rounded-3xl bg-white/10 p-6">
                 <p class="text-xs uppercase tracking-[0.3em] text-white/60">Cam kết</p>
                 <p class="mt-2 font-display text-2xl">Chính xác - An toàn - Hiệu quả - Bền vững</p>
@@ -135,15 +135,84 @@ $featuredProjects = [
     </div>
     <div class="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         @foreach ($featuredProjects as [$projectName, $image])
-        <article class="rounded-3xl overflow-hidden bg-white border border-black/10 shadow-soft">
-            <img src="{{ $image }}" alt="{{ $projectName }}" class="aspect-[4/3] w-full object-cover">
+        <button
+            type="button"
+            class="group rounded-3xl overflow-hidden bg-white border border-black/10 shadow-soft text-left"
+            data-project-image="{{ $image }}"
+            data-project-name="{{ $projectName }}"
+            aria-label="Xem ảnh lớn dự án {{ $projectName }}">
+            <img src="{{ $image }}" alt="{{ $projectName }}" class="aspect-[4/3] w-full object-cover transition duration-300 group-hover:scale-[1.02]">
             <div class="p-4">
                 <h3 class="font-display text-xl">{{ $projectName }}</h3>
+                <p class="mt-2 text-sm text-black/60">Bấm để xem ảnh lớn</p>
             </div>
-        </article>
+        </button>
         @endforeach
     </div>
+
+    <div id="project-image-modal" class="fixed inset-0 z-[80] hidden items-center justify-center p-4 sm:p-6">
+        <button type="button" class="absolute inset-0 bg-black/75" data-project-close aria-label="Đóng xem ảnh"></button>
+        <div class="relative z-10 w-full max-w-5xl rounded-2xl bg-white p-2 shadow-2xl">
+            <button
+                type="button"
+                class="absolute right-3 top-3 h-10 w-10 rounded-full bg-black/75 text-white text-2xl leading-none"
+                data-project-close
+                aria-label="Đóng">
+                &times;
+            </button>
+            <img id="project-image-modal-img" src="" alt="" class="max-h-[80vh] w-full rounded-xl object-contain bg-black/5">
+            <p id="project-image-modal-caption" class="px-3 py-2 text-sm text-black/70"></p>
+        </div>
+    </div>
 </section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const modal = document.getElementById('project-image-modal');
+        const modalImage = document.getElementById('project-image-modal-img');
+        const modalCaption = document.getElementById('project-image-modal-caption');
+        const openButtons = document.querySelectorAll('[data-project-image]');
+        const closeButtons = document.querySelectorAll('[data-project-close]');
+
+        if (!modal || !modalImage || !modalCaption || openButtons.length === 0) {
+            return;
+        }
+
+        const openModal = function(image, name) {
+            modalImage.src = image;
+            modalImage.alt = name;
+            modalCaption.textContent = name;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.classList.add('overflow-hidden');
+        };
+
+        const closeModal = function() {
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+            modalImage.src = '';
+            modalImage.alt = '';
+            modalCaption.textContent = '';
+            document.body.classList.remove('overflow-hidden');
+        };
+
+        openButtons.forEach(function(button) {
+            button.addEventListener('click', function() {
+                openModal(button.dataset.projectImage, button.dataset.projectName);
+            });
+        });
+
+        closeButtons.forEach(function(button) {
+            button.addEventListener('click', closeModal);
+        });
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape' && modal.classList.contains('flex')) {
+                closeModal();
+            }
+        });
+    });
+</script>
 
 <section class="mx-auto w-full max-w-6xl px-5 py-16">
     <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
