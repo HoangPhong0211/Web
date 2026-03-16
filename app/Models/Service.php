@@ -19,6 +19,8 @@ class Service extends Model
         'featured_image',
         'sort_order',
         'status',
+        'icon',
+        'image',
     ];
 
     protected $casts = [

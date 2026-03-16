@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 
@@ -15,10 +14,8 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
-        // 1. Tạo các vai trò trước
-        // Sử dụng firstOrCreate để tránh lỗi nếu chạy Seeder nhiều lần
         $adminRole = Role::firstOrCreate(['name' => 'admin']);
-        $editorRole = Role::firstOrCreate(['name' => 'editor']);
+        Role::firstOrCreate(['name' => 'editor']);
 
         $admin = User::query()->firstOrCreate(
             ['email' => 'admin@gmail.com'],
@@ -28,7 +25,9 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        $admin->assignRole($adminRole);
+        if (method_exists($admin, 'assignRole')) {
+            $admin->assignRole($adminRole);
+        }
 
         User::query()->firstOrCreate(
             ['email' => 'test@example.com'],

@@ -59,6 +59,8 @@ Route::get('/danh-muc-phep-thu', function () {
 });
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::redirect('/', '/admin/dashboard');
+
     Route::get('/dashboard', function () {
         return view('admin.dashboard');
     })->name('dashboard');

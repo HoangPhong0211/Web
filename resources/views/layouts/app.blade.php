@@ -75,11 +75,7 @@
         </header>
 
         <main id="main-content" class="flex-1">
-            @isset($slot)
-            {{ $slot }}
-            @else
             @yield('content')
-            @endisset
         </main>
 
         <footer class="bg-[color:var(--color-ink)] text-white">

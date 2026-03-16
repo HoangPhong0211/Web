@@ -14,16 +14,20 @@ class Project extends Model
     protected $fillable = [
         'title',
         'slug',
+        'description',
+        'image',
         'location',
+        'project_date',
+        'status',
         'year',
         'summary',
         'featured_image',
-        'status',
     ];
 
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'project_date' => 'date',
         'year' => 'integer',
     ];
 }
