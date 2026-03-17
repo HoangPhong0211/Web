@@ -24,13 +24,24 @@ class ServiceController extends Controller
     {
         $request->validate(['title' => 'required|max:255']);
 
-        Service::create([
+        // 1. Lưu thông tin cơ bản và gán vào biến $service
+        $service = Service::create([
             'title' => $request->title,
             'slug' => Str::slug($request->title),
             'summary' => $request->summary,
             'description' => $request->description,
             'status' => $request->status ?? 'published',
         ]);
+
+        // 2. Xử lý ảnh và CẬP NHẬT vào database
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('images'), $filename);
+
+            // PHẢI CÓ DÒNG NÀY ĐỂ LƯU VÀO DB
+            $service->update(['image' => $filename]);
+        }
 
         return redirect()->route('admin.services.index')->with('success', 'Thêm dịch vụ thành công!');
     }
@@ -44,18 +55,29 @@ class ServiceController extends Controller
     public function update(Request $request, $id)
     {
         $service = Service::findOrFail($id);
-
-        // Validate dữ liệu
         $request->validate(['title' => 'required|max:255']);
 
-        // Cập nhật
         $service->update([
             'title' => $request->title,
-            'slug' => \Illuminate\Support\Str::slug($request->title),
+            'slug' => Str::slug($request->title),
             'summary' => $request->summary,
             'description' => $request->description,
             'status' => $request->status,
         ]);
+
+        if ($request->hasFile('image')) {
+            // Xóa ảnh cũ để tránh rác server
+            if ($service->image && file_exists(public_path('images/' . $service->image))) {
+                unlink(public_path('images/' . $service->image));
+            }
+
+            $file = $request->file('image');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('images'), $filename);
+
+            // CẬP NHẬT TÊN ẢNH MỚI VÀO DB
+            $service->update(['image' => $filename]);
+        }
 
         return redirect()->route('admin.services.index')->with('success', 'Cập nhật thành công!');
     }

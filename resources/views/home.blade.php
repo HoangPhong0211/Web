@@ -225,11 +225,25 @@ $featuredProjects = [
     <div class="mt-8 grid gap-6 md:grid-cols-3">
         @forelse ($latestPosts ?? [] as $item)
         <a href="{{ route('posts.show', $item->slug) }}" class="rounded-3xl border border-black/10 bg-white overflow-hidden shadow-soft">
+            {{-- SỬA LOGIC HIỂN THỊ ẢNH TẠI ĐÂY --}}
             @if ($item->featured_image)
-            <img src="{{ $item->featured_image }}" alt="{{ $item->title }}" class="aspect-[4/3] w-full object-cover">
+                @php
+                    $img = $item->featured_image;
+                    // Kiểm tra nếu là URL hoặc chứa 'images/' thì dùng asset() trực tiếp, ngược lại thêm 'images/'
+                    $imagePath = (str_starts_with($img, 'http') || str_contains($img, 'images/')) 
+                                 ? asset($img) 
+                                 : asset('images/' . $img);
+                @endphp
+                <img src="{{ $imagePath }}" 
+                     alt="{{ $item->title }}" 
+                     class="aspect-[4/3] w-full object-cover transition duration-300 hover:scale-105"
+                     onerror="this.onerror=null;this.src='{{ asset('images/main-logo.png') }}';">
             @else
-            <div class="aspect-[4/3] bg-[linear-gradient(120deg,_#f3d3bf,_#f9f2e7)]"></div>
+                <div class="aspect-[4/3] bg-[linear-gradient(120deg,_#f3d3bf,_#f9f2e7)] flex items-center justify-center">
+                    <i class="fa fa-image text-black/10 text-4xl"></i>
+                </div>
             @endif
+
             <div class="p-5">
                 <p class="text-xs uppercase tracking-[0.3em] text-black/50">Tin mới</p>
                 <h3 class="mt-2 font-display text-xl">{{ $item->title }}</h3>
@@ -237,18 +251,10 @@ $featuredProjects = [
             </div>
         </a>
         @empty
-        <div class="rounded-3xl border border-black/10 bg-white p-6 text-sm text-black/60">Chưa có bài viết. Hãy thêm bài viết để hiển thị tại đây.</div>
+            <div class="rounded-3xl border border-black/10 bg-white p-6 text-sm text-black/60 col-span-3 text-center">
+                Chưa có bài viết. Hãy thêm bài viết để hiển thị tại đây.
+            </div>
         @endforelse
-    </div>
-</section>
-
-<section class="mx-auto w-full max-w-6xl px-5 pb-20">
-    <div class="rounded-[36px] bg-[color:var(--color-ink)] text-white p-10 md:p-14 flex flex-col lg:flex-row gap-8 items-start lg:items-center justify-between">
-        <div>
-            <p class="text-sm uppercase tracking-[0.3em] text-white/60">Sẵn sàng hợp tác</p>
-            <h2 class="mt-3 text-3xl md:text-4xl font-display">Liên hệ để nhận báo giá và tư vấn kỹ thuật</h2>
-        </div>
-        <a href="/lien-he" class="inline-flex items-center justify-center rounded-full bg-brand px-6 py-3 text-white font-semibold">Gửi yêu cầu</a>
     </div>
 </section>
 @endsection
