@@ -13,7 +13,7 @@ class PostController extends Controller
 {
     public function index()
     {
-        $posts = Post::with('category')->latest()->paginate(10);
+        $posts = \App\Models\Post::with('category')->latest()->paginate(10);
 
         return view('admin.posts.index', compact('posts'));
     }
@@ -97,5 +97,22 @@ class PostController extends Controller
     public function show($id)
     {
         return redirect()->route('admin.posts.edit', $id);
+    }
+
+    public function destroy($id)
+    {
+        // 1. Tìm bài viết cần xóa
+        $post = \App\Models\Post::findOrFail($id);
+
+        // 2. Xóa ảnh đính kèm trong thư mục public/images (nếu có)
+        if ($post->image && file_exists(public_path('images/' . $post->image))) {
+            unlink(public_path('images/' . $post->image));
+        }
+
+        // 3. Thực hiện xóa trong Database
+        $post->delete();
+
+        // 4. Quay về trang danh sách với thông báo thành công
+        return redirect()->route('admin.posts.index')->with('success', 'Đã xóa bài viết thành công!');
     }
 }
