@@ -13,7 +13,7 @@ class PostController extends Controller
 {
     public function index()
     {
-        $posts = \App\Models\Post::with('category')->latest()->paginate(10);
+        $posts = Post::with('category')->latest()->paginate(10);
 
         return view('admin.posts.index', compact('posts'));
     }
@@ -26,24 +26,38 @@ class PostController extends Controller
 
     public function store(Request $request)
     {
+        // 1. Validate dữ liệu
         $request->validate([
             'title' => 'required|max:255',
-            'category_id' => 'required|exists:categories,id',
             'content' => 'required',
-            'featured_image' => 'nullable|image|mimes:jpg,png,jpeg|max:2048'
+            'featured_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048'
         ]);
 
-        $post = new Post($request->all());
-        $post->slug = Str::slug($request->input('title'));
-        $post->author_id = Auth::id(); // Tự động lấy ID người đang login
+        // 2. Tạo bài viết mới (Lúc này chưa có ảnh)
+        $post = Post::create([
+            'title' => $request->title,
+            'slug' => Str::slug($request->title),
+            'content' => $request->input('content'),
+            'category_id' => $request->category_id,
+            'status' => $request->status ?? 'published',
+            'author_id' => auth()->id(),
+        ]);
 
-        // Xử lý upload ảnh nếu có
+        // 3. Xử lý upload ảnh và CẬP NHẬT tên file vào Database
         if ($request->hasFile('featured_image')) {
-            $post->featured_image = $request->file('featured_image')->store('posts', 'public');
+            $file = $request->file('featured_image');
+
+            // Làm sạch tên file để tránh lỗi trên server thực tế
+            $filename = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
+
+            // Di chuyển file vào thư mục public/images
+            $file->move(public_path('images'), $filename);
+
+            // LƯU TÊN FILE VÀO DATABASE
+            $post->update(['featured_image' => $filename]);
         }
 
-        $post->save();
-        return redirect()->route('admin.posts.index')->with('success', 'Đã thêm bài viết mới!');
+        return redirect()->route('admin.posts.index')->with('success', 'Thêm bài viết mới thành công!');
     }
 
     public function edit($id)
@@ -60,53 +74,48 @@ class PostController extends Controller
 
     public function update(Request $request, $id)
     {
-        // 1. Tìm bài viết cần sửa
         $post = Post::findOrFail($id);
 
-        // 2. Kiểm tra dữ liệu đầu vào (Validation) để tránh lỗi bảo mật
         $request->validate([
             'title' => 'required|max:255',
             'content' => 'required',
         ]);
 
-        // 3. Chuẩn bị dữ liệu để cập nhật
+        // Cập nhật thông tin cơ bản
         $post->title = $request->input('title');
-        $post->slug = Str::slug($request->input('title')); // Tự động tạo link sạch (SEO)
+        $post->slug = Str::slug($request->input('title'));
         $post->content = $request->input('content');
         $post->category_id = $request->input('category_id');
-        $post->status = $request->input('status', $post->status);
 
-        // 4. Xử lý upload ảnh (nếu người dùng chọn ảnh mới)
-        if ($request->hasFile('featured_image')) {
-            $file = $request->file('featured_image');
-            $filename = time() . '_' . $file->getClientOriginalName();
-
-            // Lưu trực tiếp vào thư mục public/images để hiển thị ngay
-            $file->move(public_path('images'), $filename);
-
-            $post->featured_image = $filename;
-        }
+        // QUAN TRỌNG: Kiểm tra trạng thái có bị đổi thành draft không
+        $post->status = $request->input('status', 'published');
 
         if ($request->hasFile('featured_image')) {
-            // 1. Xóa ảnh cũ khỏi thư mục nếu nó tồn tại và không phải ảnh mẫu
-            if ($post->featured_image && file_exists(public_path('images/' . $post->featured_image))) {
-                // Kiểm tra để tránh xóa nhầm ảnh mẫu của hệ thống
-                if (!str_contains($post->featured_image, 'post-item')) {
-                    unlink(public_path('images/' . $post->featured_image));
+            try {
+                $file = $request->file('featured_image');
+                $filename = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
+
+                // Di chuyển file vào thư mục public/images
+                $file->move(public_path('images'), $filename);
+
+                // Xóa ảnh cũ nếu có để sạch server
+                if ($post->featured_image && file_exists(public_path('images/' . $post->featured_image))) {
+                    if (!str_contains($post->featured_image, 'post-item')) {
+                        unlink(public_path('images/' . $post->featured_image));
+                    }
                 }
-            }
 
-            // 2. Xử lý upload ảnh mới (giữ nguyên code của bạn)
-            $file = $request->file('featured_image');
-            $filename = time() . '_' . $file->getClientOriginalName();
-            $file->move(public_path('images'), $filename);
-            $post->featured_image = $filename;
+                $post->featured_image = $filename;
+            } catch (\Exception $e) {
+                // Nếu lỗi upload, vẫn quay lại trang edit và báo lỗi cụ thể
+                return back()->withErrors(['featured_image' => 'Lỗi upload ảnh: ' . $e->getMessage()])->withInput();
+            }
         }
 
-        // 5. Lưu vào Database
+        // Lưu tất cả thay đổi vào Database
         $post->save();
 
-        // 6. Quay lại trang danh sách với thông báo thành công
+        // CHỈ KHI LƯU THÀNH CÔNG MỚI REDIRECT
         return redirect()->route('admin.posts.index')->with('success', 'Cập nhật bài viết thành công!');
     }
 
@@ -118,11 +127,14 @@ class PostController extends Controller
     public function destroy($id)
     {
         // 1. Tìm bài viết cần xóa
-        $post = \App\Models\Post::findOrFail($id);
+        $post = Post::findOrFail($id);
 
         // 2. Xóa ảnh đính kèm trong thư mục public/images (nếu có)
-        if ($post->image && file_exists(public_path('images/' . $post->image))) {
-            unlink(public_path('images/' . $post->image));
+        if ($post->featured_image && file_exists(public_path('images/' . $post->featured_image))) {
+            // Chỉ xóa nếu không phải là ảnh mẫu post-item
+            if (!str_contains($post->featured_image, 'post-item')) {
+                unlink(public_path('images/' . $post->featured_image));
+            }
         }
 
         // 3. Thực hiện xóa trong Database

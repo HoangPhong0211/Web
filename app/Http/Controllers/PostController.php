@@ -10,9 +10,9 @@ class PostController extends Controller
     public function index()
     {
         $posts = Post::query()
+            ->where('status', 'published')
             ->orderByDesc('created_at')
-            ->limit(8)
-            ->get();
+            ->paginate(6); 
 
         return view('news', [
             'posts' => $posts,

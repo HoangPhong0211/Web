@@ -12,15 +12,13 @@ class Post extends Model
     protected $table = 'posts';
 
     protected $fillable = [
-        'category_id',
-        'author_id',
         'title',
         'slug',
-        'excerpt',
         'content',
+        'category_id',
         'featured_image',
-        'views',
         'status',
+        'author_id' 
     ];
 
     protected $casts = [
