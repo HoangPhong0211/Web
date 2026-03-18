@@ -38,7 +38,7 @@
                 <a href="/" class="flex items-center gap-3">
                     <span class="grid place-items-center h-11 w-11 rounded-full bg-brand text-white font-display text-lg">N</span>
                     <span class="flex flex-col leading-tight">
-                        <span class="font-display text-lg">Hoàng Gia Việt Nam</span>
+                        <span class="font-display text-lg">Địa Chất Hoàng Gia</span>
                         <span class="text-xs uppercase tracking-[0.2em] text-black/60">LAS-XD 1109</span>
                     </span>
                 </a>

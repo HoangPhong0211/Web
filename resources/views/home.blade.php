@@ -41,34 +41,38 @@ $featuredProjects = [
     <div class="relative mx-auto w-full max-w-6xl px-5 py-14 lg:py-20">
         <div class="space-y-5 max-w-3xl">
             <p class="text-sm uppercase tracking-[0.3em] text-black/60">Công ty Cổ phần Địa kỹ thuật Hoàng Gia Việt Nam</p>
-            <h1 class="text-4xl md:text-5xl lg:text-6xl font-display">Hoàng Gia Việt Nam: <span class="whitespace-nowrap">Chuẩn dữ liệu - Vững hạ tầng.</span></h1>
-            <p class="text-base md:text-lg text-black/70">
-                Thành lập năm 2011, Hoàng Gia Việt Nam hoạt động với mã LAS-XD 1109 trong các lĩnh vực khảo sát,
-                thí nghiệm và kiểm định, đồng hành cùng chủ đầu tư và nhà thầu trong các dự án hạ tầng, dân dụng, công nghiệp.
-            </p>
-            <div class="flex flex-wrap gap-3 text-sm font-medium">
-                <span class="rounded-full bg-white px-4 py-2 border border-black/10">Chính xác</span>
-                <span class="rounded-full bg-white px-4 py-2 border border-black/10">An toàn</span>
-                <span class="rounded-full bg-white px-4 py-2 border border-black/10">Hiệu quả</span>
-                <span class="rounded-full bg-white px-4 py-2 border border-black/10">Bền vững</span>
-            </div>
+            <h1 class="text-4xl md:text-5xl lg:text-5xl font-display text-gray-900">
+                Địa Chất Hoàng Gia Việt Nam:
+                <span class="block mt-1 italic text-center text-gray-800">Chuẩn dữ liệu – Vững hạ tầng.</span>
+            </h1>
         </div>
+        <p class="text-base md:text-lg text-black/70">
+            Thành lập năm 2011, Hoàng Gia Việt Nam hoạt động với mã LAS-XD 1109 trong các lĩnh vực khảo sát,
+            thí nghiệm và kiểm định, đồng hành cùng chủ đầu tư và nhà thầu trong các dự án hạ tầng, dân dụng, công nghiệp.
+        </p>
+        <div class="flex flex-wrap gap-3 text-sm font-medium">
+            <span class="rounded-full bg-white px-4 py-2 border border-black/10">Chính xác</span>
+            <span class="rounded-full bg-white px-4 py-2 border border-black/10">An toàn</span>
+            <span class="rounded-full bg-white px-4 py-2 border border-black/10">Hiệu quả</span>
+            <span class="rounded-full bg-white px-4 py-2 border border-black/10">Bền vững</span>
+        </div>
+    </div>
 
-        <div class="mt-8 overflow-x-auto no-scrollbar">
-            <div class="flex gap-4 min-w-max">
-                @foreach ($heroSlides as [$image, $caption])
-                <article class="w-[80vw] max-w-[560px] rounded-3xl overflow-hidden border border-black/10 bg-white shadow-soft">
-                    <img src="{{ $image }}" alt="{{ $caption }}" class="aspect-[16/9] w-full object-cover">
-                    <p class="p-4 text-sm font-medium">{{ $caption }}</p>
-                </article>
-                @endforeach
-            </div>
+    <div class="mt-8 overflow-x-auto no-scrollbar">
+        <div class="flex gap-4 min-w-max">
+            @foreach ($heroSlides as [$image, $caption])
+            <article class="w-[80vw] max-w-[560px] rounded-3xl overflow-hidden border border-black/10 bg-white shadow-soft">
+                <img src="{{ $image }}" alt="{{ $caption }}" class="aspect-[16/9] w-full object-cover">
+                <p class="p-4 text-sm font-medium">{{ $caption }}</p>
+            </article>
+            @endforeach
         </div>
+    </div>
 
-        <div class="mt-8 flex flex-wrap gap-4">
-            <a href="/dich-vu" class="inline-flex items-center justify-center rounded-full bg-brand px-6 py-3 text-white font-semibold">Xem lĩnh vực hoạt động</a>
-            <a href="/lien-he" class="inline-flex items-center justify-center rounded-full border border-black/20 px-6 py-3 font-semibold">Liên hệ nhận hồ sơ năng lực</a>
-        </div>
+    <div class="mt-8 flex flex-wrap gap-4">
+        <a href="/dich-vu" class="inline-flex items-center justify-center rounded-full bg-brand px-6 py-3 text-white font-semibold">Xem lĩnh vực hoạt động</a>
+        <a href="/lien-he" class="inline-flex items-center justify-center rounded-full border border-black/20 px-6 py-3 font-semibold">Liên hệ nhận hồ sơ năng lực</a>
+    </div>
     </div>
 </section>
 
@@ -227,21 +231,21 @@ $featuredProjects = [
         <a href="{{ route('posts.show', $item->slug) }}" class="rounded-3xl border border-black/10 bg-white overflow-hidden shadow-soft">
             {{-- SỬA LOGIC HIỂN THỊ ẢNH TẠI ĐÂY --}}
             @if ($item->featured_image)
-                @php
-                    $img = $item->featured_image;
-                    // Kiểm tra nếu là URL hoặc chứa 'images/' thì dùng asset() trực tiếp, ngược lại thêm 'images/'
-                    $imagePath = (str_starts_with($img, 'http') || str_contains($img, 'images/')) 
-                                 ? asset($img) 
-                                 : asset('images/' . $img);
-                @endphp
-                <img src="{{ $imagePath }}" 
-                     alt="{{ $item->title }}" 
-                     class="aspect-[4/3] w-full object-cover transition duration-300 hover:scale-105"
-                     onerror="this.onerror=null;this.src='{{ asset('images/main-logo.png') }}';">
+            @php
+            $img = $item->featured_image;
+            // Kiểm tra nếu là URL hoặc chứa 'images/' thì dùng asset() trực tiếp, ngược lại thêm 'images/'
+            $imagePath = (str_starts_with($img, 'http') || str_contains($img, 'images/'))
+            ? asset($img)
+            : asset('images/' . $img);
+            @endphp
+            <img src="{{ $imagePath }}"
+                alt="{{ $item->title }}"
+                class="aspect-[4/3] w-full object-cover transition duration-300 hover:scale-105"
+                onerror="this.onerror=null;this.src='{{ asset('images/main-logo.png') }}';">
             @else
-                <div class="aspect-[4/3] bg-[linear-gradient(120deg,_#f3d3bf,_#f9f2e7)] flex items-center justify-center">
-                    <i class="fa fa-image text-black/10 text-4xl"></i>
-                </div>
+            <div class="aspect-[4/3] bg-[linear-gradient(120deg,_#f3d3bf,_#f9f2e7)] flex items-center justify-center">
+                <i class="fa fa-image text-black/10 text-4xl"></i>
+            </div>
             @endif
 
             <div class="p-5">
@@ -251,9 +255,9 @@ $featuredProjects = [
             </div>
         </a>
         @empty
-            <div class="rounded-3xl border border-black/10 bg-white p-6 text-sm text-black/60 col-span-3 text-center">
-                Chưa có bài viết. Hãy thêm bài viết để hiển thị tại đây.
-            </div>
+        <div class="rounded-3xl border border-black/10 bg-white p-6 text-sm text-black/60 col-span-3 text-center">
+            Chưa có bài viết. Hãy thêm bài viết để hiển thị tại đây.
+        </div>
         @endforelse
     </div>
 </section>
